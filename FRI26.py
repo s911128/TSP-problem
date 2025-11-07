@@ -91,7 +91,7 @@ if __name__=="__main__":
 
         start = time.time()
         
-        #dimension = 26
+        #dimension = 26       #測試用
 
         all_vertex = list(range(1,dimension+1))
         all_vertex.remove(start_vertex)
@@ -111,13 +111,13 @@ if __name__=="__main__":
         #           1:[[[2, 3, 4, 5], [1, 3, 5, 4, 2], np.int64(282)]]               ##1→3→5→4→2:282
         #       }
         # }
-
         for i in range(1,dimension-1):
             temp[i] = {}
             for j in range(2,dimension+1):
                 temp[i][j] = []
-
         temp[dimension-1]= {1:[]}
+
+        #tsp程式
         route, minimum = tsp(all_vertex, end_vertex)
 
         end = time.time()
