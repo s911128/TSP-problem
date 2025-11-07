@@ -105,25 +105,25 @@ def tsp2(novisited, end_vertex, matrix, temp):
 
     if len(novisited) == 0:
         return route, matrix[0][end_vertex-1]
-
-
-    if any(route[0] == novisited for route in temp[end_vertex]):
-        return temp[end_vertex][0], temp[end_vertex][1]
-
     
-    for vertex in novisited:
+    for item in enumerate(temp[end_vertex]):
+        if item[1][0] == novisited:
+            return item[1][1],item[1][2]
+    
+    for vertex in novisited:  
 
         remain_vertex = novisited.copy()
         remain_vertex.remove(vertex)
         tsp_route, tsp_distance = tsp2(remain_vertex, vertex, matrix, temp)
-        tsp_route.append(vertex)
+        tsp_route_copy = tsp_route.copy()
+        tsp_route_copy.append(vertex)
         distanse = tsp_distance + matrix[vertex-1][end_vertex-1]
 
         if distanse < minimum_distance:
-            route = tsp_route
+            route = tsp_route_copy
             minimum_distance = distanse
 
-    temp[end_vertex].append([route,minimum_distance])
+    temp[end_vertex].append([novisited,route,minimum_distance])
     
     return route, minimum_distance
 
@@ -142,7 +142,7 @@ if __name__=="__main__":
         route = []
         start = time.time()
 
-        all_vertex = list(range(2,10))
+        all_vertex = list(range(2,6))
         temp={}
         for i in range(1,27):
             temp[i] = []
