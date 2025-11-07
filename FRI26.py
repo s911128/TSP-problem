@@ -1,16 +1,13 @@
 import time
 import numpy as np
-import math
-from itertools import permutations
+
+matrix = []
 
 def read_file(file):
     dimension = 1
-    matrix = []
-
     with open(file) as obj:
         data = obj.readlines()
     obj.close()
-
 
     isMatrix = False
     i = 0
@@ -38,75 +35,23 @@ def read_file(file):
         if line.startswith("EDGE_WEIGHT_SECTION"):
             isMatrix = True
 
-        if i == 25 and j == 25:
+        if i == dimension-1 and j == dimension-1:
             isMatrix = False
 
     return dimension, matrix
 
 
-def tsp(matrix, start):
 
-    vertex = list(range(1,27))
-    vertex.remove(start)
-
-    p = permutations(vertex)
-    routes = []
-    for i,r in enumerate(p):
-        print(i)
-        routes.append(r)
-
-    minimum = 257*26
-    print(1)
-    mini_route = ()
-    for i, r in enumerate(routes):
-        distance = matrix[0][r[0]]
-        for j in range(0,len(r)-1):
-
-            distance += matrix[r[j]][r[j+1]]
-
-        distance += matrix[r[24]][0]
-        if distance < minimum:
-            minimum = distance
-            mini_route = list(r)
-        
-        print(mini_route)
- 
-    
-
-    print(mini_route)
-    return mini_route
-
-def minimum_distanse(vertex, matrix):
-
-    l = vertex
-    minimum = 0
-
-    if len(vertex) == 1:
-        minimum = matrix[0,vertex[0]-1]
-    else:
-        for k in vertex:
-            l = list(vertex)
-            l.remove(k)
-
-            p = permutations(l)
-            for i,r in enumerate(p):
-
-
-                
-                minimum = minimum + minimum_distanse(l, matrix)
-
-
-
-
-def tsp2(novisited, end_vertex, matrix, temp):
+def tsp(novisited, end_vertex):
 
     minimum_distance = 257*26
-    route = []
+    route = [1]
+    remain_count = len(novisited)
 
     if len(novisited) == 0:
         return route, matrix[0][end_vertex-1]
     
-    for item in enumerate(temp[end_vertex]):
+    for item in enumerate(temp[remain_count][end_vertex]):
         if item[1][0] == novisited:
             return item[1][1],item[1][2]
     
@@ -114,7 +59,7 @@ def tsp2(novisited, end_vertex, matrix, temp):
 
         remain_vertex = novisited.copy()
         remain_vertex.remove(vertex)
-        tsp_route, tsp_distance = tsp2(remain_vertex, vertex, matrix, temp)
+        tsp_route, tsp_distance = tsp(remain_vertex, vertex)
         tsp_route_copy = tsp_route.copy()
         tsp_route_copy.append(vertex)
         distanse = tsp_distance + matrix[vertex-1][end_vertex-1]
@@ -123,7 +68,8 @@ def tsp2(novisited, end_vertex, matrix, temp):
             route = tsp_route_copy
             minimum_distance = distanse
 
-    temp[end_vertex].append([novisited,route,minimum_distance])
+    temp[remain_count][end_vertex].append([novisited,route,minimum_distance])
+    
     
     return route, minimum_distance
 
@@ -137,28 +83,49 @@ if __name__=="__main__":
     try:
         dimension, matrix = read_file(file)
 
-
-        b = 1
+        start_vertex = 1
+        end_vertex = 1
         route = []
-        start = time.time()
-
-        all_vertex = list(range(2,6))
         temp={}
-        for i in range(1,27):
-            temp[i] = []
-        route, dimension = tsp2(all_vertex, 1, matrix, temp)
-        print(temp)
+
+
+        start = time.time()
+        
+        #dimension = 26
+
+        all_vertex = list(range(1,dimension+1))
+        all_vertex.remove(start_vertex)
+
+        #根據維度建立temp{尚未訪問的端點數量:{前一個端點:[]}}
+        #例:temp{
+        #       1:{
+        #           2:[[[3], [1, 3], np.int64(133)], [[4], [1, 4], np.int64(182)]]   ##1→3→2:133,1→4→2:182
+        #           3:[[[4], [1, 4], np.int64(171)]]                                 ##1→4→3:171
+        #       }
+        #       2:{
+        #           2:[[[4, 5], [1, 5, 4], np.int64(197)]]                           ##1→5→4→2:197
+        #       }
+        # 
+        # 
+        #       n-1:{
+        #           1:[[[2, 3, 4, 5], [1, 3, 5, 4, 2], np.int64(282)]]               ##1→3→5→4→2:282
+        #       }
+        # }
+
+        for i in range(1,dimension-1):
+            temp[i] = {}
+            for j in range(2,dimension+1):
+                temp[i][j] = []
+
+        temp[dimension-1]= {1:[]}
+        route, minimum = tsp(all_vertex, end_vertex)
+
         end = time.time()
         print("執行時間:",end-start,"秒")
+        print("最佳解: ", route)
+        print("總距離: ", minimum)
 
-        print(route)
         #route = [1,2,3,4,6,5,7,8,9,10,14,15,13,12,11,16,19,20,18,17,21,22,26,23,24,25,1]
-
-        sum = 0
-        for i in range(len(route)-1):
-            sum = sum + matrix[route[i]-1][route[i+1]-1]
-
-        print(sum)
 
     except Exception as e:
         print(e)
