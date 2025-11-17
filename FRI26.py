@@ -42,14 +42,15 @@ def read_file(file):
 
 
 
-def tsp(novisited, end_vertex):
+def tsp(novisited, start_vertex, end_vertex):
 
-    minimum_distance = 257*26
-    route = [1]
+    minimum_distance = float("inf")
+    route = []
+    route.append(start_vertex)
     remain_count = len(novisited)
 
     if len(novisited) == 0:
-        return route, matrix[0][end_vertex-1]
+        return route, matrix[start_vertex-1][end_vertex-1]
     
     for item in enumerate(temp[remain_count][end_vertex]):
         if item[1][0] == novisited:
@@ -59,7 +60,7 @@ def tsp(novisited, end_vertex):
 
         remain_vertex = novisited.copy()
         remain_vertex.remove(vertex)
-        tsp_route, tsp_distance = tsp(remain_vertex, vertex)
+        tsp_route, tsp_distance = tsp(remain_vertex, start_vertex, vertex)
         tsp_route_copy = tsp_route.copy()
         tsp_route_copy.append(vertex)
         distanse = tsp_distance + matrix[vertex-1][end_vertex-1]
@@ -91,12 +92,12 @@ if __name__=="__main__":
 
         start = time.time()
         
-        #dimension = 26       #測試用
+        #dimension = 4       #測試用
 
         all_vertex = list(range(1,dimension+1))
         all_vertex.remove(start_vertex)
 
-        #根據維度建立temp{尚未訪問的端點數量:{前一個端點:[]}}
+        #根據維度建立temp{去掉前一個端點後尚未訪問的端點數量:{前一個端點:[[剩餘未訪問的端點],[距離最短的路徑],[最短的路徑的距離]]}}
         #例:temp{
         #       1:{
         #           2:[[[3], [1, 3], np.int64(133)], [[4], [1, 4], np.int64(182)]]   ##1→3→2:133,1→4→2:182
@@ -108,7 +109,7 @@ if __name__=="__main__":
         # 
         # 
         #       n-1:{
-        #           1:[[[2, 3, 4, 5], [1, 3, 5, 4, 2], np.int64(282)]]               ##1→3→5→4→2:282
+        #           1:[[[2, 3, 4, 5], [1, 3, 5, 4, 2], np.int64(282)]]               ##1→3→5→4→2→1:282
         #       }
         # }
         for i in range(1,dimension-1):
@@ -118,7 +119,7 @@ if __name__=="__main__":
         temp[dimension-1]= {1:[]}
 
         #tsp程式
-        route, minimum = tsp(all_vertex, end_vertex)
+        route, minimum = tsp(all_vertex,start_vertex, end_vertex)
 
         end = time.time()
         print("執行時間:",end-start,"秒")
